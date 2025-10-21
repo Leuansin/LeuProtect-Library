@@ -87,7 +87,7 @@ int main() {
 
 | Feature | Description | Descripción |
 |---|---:|---|
-| Anti-Debugging | Detects and prevents debuggers like x64dbg, OllyDbg, Cheat Engine | Detecta y previene debuggers como x64dbg, OllyDbg, Cheat Engine |
+| Multi-Layer Debugger Detection | Combines API checks, PEB, hardware breakpoints, checksum verification, window detection, registry keys, and timing analysis | Combina verificaciones de API, PEB, puntos de interrupción hardware, verificación de checksum, detección de ventanas, claves de registro y análisis de tiempo
 | Memory Protection | Uses VirtualProtect to secure memory regions | Usa VirtualProtect para proteger regiones de memoria |
 | Code Obfuscation | Runtime code modification to hinder static analysis | Modificación de código en tiempo de ejecución para dificultar análisis estático |
 | PE Header Protection | Secures and obfuscates PE headers | Protege y ofusca headers PE |
