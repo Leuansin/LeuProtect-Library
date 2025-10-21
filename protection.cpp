@@ -3,15 +3,19 @@
 #include <intrin.h>
 #include <algorithm>
 #include <atomic>
+#include <random>
+#include <chrono>
+#include <thread>
+#include <vector>
+#include <string>
 
-// Variables globales
 bool LeuProtection::debuggerDetected = false;
 std::thread LeuProtection::protectionThread;
 bool LeuProtection::running = false;
 DWORD oldProtect;
 BYTE* imageBase;
 
-// ========== FUNCIONES EXISTENTES ==========
+// ========== FUNCIONES DE DETECCIÓN BÁSICAS ==========
 bool LeuProtection::IsDebuggerPresentAPI() {
     return IsDebuggerPresent();
 }
@@ -38,6 +42,94 @@ bool LeuProtection::CheckHardwareBreakpoints() {
 
     if (GetThreadContext(GetCurrentThread(), &ctx)) {
         return (ctx.Dr0 != 0) || (ctx.Dr1 != 0) || (ctx.Dr2 != 0) || (ctx.Dr3 != 0);
+    }
+    return false;
+}
+
+// ========== FUNCIONES DE PROTECCIÓN AVANZADAS ==========
+DWORD CalculateChecksum(BYTE* data, size_t size) {
+    DWORD checksum = 0;
+    for (size_t i = 0; i < size; i++) {
+        checksum = (checksum >> 1) | (checksum << 31);
+        checksum += data[i];
+    }
+    return checksum;
+}
+
+bool CheckModuleByChecksum(const wchar_t* moduleName) {
+    HMODULE hModule = GetModuleHandleW(moduleName);
+    if (!hModule) return false;
+
+    MODULEINFO modInfo;
+    if (GetModuleInformation(GetCurrentProcess(), hModule, &modInfo, sizeof(modInfo))) {
+        DWORD checksum = CalculateChecksum((BYTE*)modInfo.lpBaseOfDll, modInfo.SizeOfImage);
+        return checksum != 0;
+    }
+    return false;
+}
+
+bool FindHiddenDebuggerWindows() {
+    const wchar_t* debuggerWindows[] = {
+        L"OLLYDBG", L"IDA", L"x64dbg", L"WinDbg",
+        L"Immunity", L"Cheat Engine", L"Process Hacker"
+    };
+
+    for (const wchar_t* className : debuggerWindows) {
+        if (FindWindowW(className, NULL)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AdvancedTimingCheck() {
+    LARGE_INTEGER frequency, start, end;
+    QueryPerformanceFrequency(&frequency);
+
+    QueryPerformanceCounter(&start);
+
+    volatile int result = 0;
+    for (int i = 0; i < 1000000; i++) {
+        result += i * i;
+        if (i % 1000 == 0) {
+            __nop();
+        }
+    }
+
+    QueryPerformanceCounter(&end);
+
+    double elapsed = (end.QuadPart - start.QuadPart) * 1000000.0 / frequency.QuadPart;
+    return elapsed < 50000;
+}
+
+bool CheckDebuggerRegistryKeys() {
+    HKEY hKey;
+    const wchar_t* debugKeys[] = {
+        L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug",
+        L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options",
+        L"SOFTWARE\\OllyDbg",
+        L"SOFTWARE\\IDA Pro"
+    };
+
+    for (const wchar_t* keyPath : debugKeys) {
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, keyPath, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CheckDebuggerProcessNames() {
+    const wchar_t* debuggers[] = {
+        L"x64dbg.exe", L"ollydbg.exe", L"ida64.exe", L"idaq.exe",
+        L"windbg.exe", L"cheatengine-x86_64.exe", L"processhacker.exe", L"hxd.exe"
+    };
+
+    for (const wchar_t* tool : debuggers) {
+        if (GetModuleHandleW(tool)) {
+            return true;
+        }
     }
     return false;
 }
@@ -97,16 +189,30 @@ void LeuProtection::MemoryProtection() {
 }
 
 void LeuProtection::AntiAnalysis() {
-    const char* debuggers[] = {
-        "x64dbg", "ollydbg", "ida64", "idaq", "windbg",
-        "cheatengine", "processhacker", "hxd"
-    };
+    if (CheckDebuggerProcessNames()) {
+        debuggerDetected = true;
+        ExitProcess(0);
+    }
 
-    for (const char* tool : debuggers) {
-        if (GetModuleHandleA(tool)) {
-            debuggerDetected = true;
-            ExitProcess(0);
-        }
+    if (CheckModuleByChecksum(L"x64dbg.exe") ||
+        CheckModuleByChecksum(L"cheatengine-x86_64.exe")) {
+        debuggerDetected = true;
+        ExitProcess(0);
+    }
+
+    if (FindHiddenDebuggerWindows()) {
+        debuggerDetected = true;
+        ExitProcess(0);
+    }
+
+    if (CheckDebuggerRegistryKeys()) {
+        debuggerDetected = true;
+        ExitProcess(0);
+    }
+
+    if (AdvancedTimingCheck()) {
+        debuggerDetected = true;
+        ExitProcess(0);
     }
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -153,7 +259,6 @@ void LeuProtection::CleanTraces() {
     }
 }
 
-// ========== NUEVAS FUNCIONES ==========
 void LeuProtection::RemoveFromProcessList() {
     __try {
         PPEB peb = (PPEB)__readgsqword(0x60);
@@ -180,29 +285,6 @@ void LeuProtection::RemoveFromProcessList() {
     }
 }
 
-void LeuProtection::HideProcessFromToolhelp() {
-    __try {
-        DWORD currentPID = GetCurrentProcessId();
-        HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-
-        if (hSnapshot != INVALID_HANDLE_VALUE) {
-            PROCESSENTRY32 pe;
-            pe.dwSize = sizeof(PROCESSENTRY32);
-
-            if (Process32First(hSnapshot, &pe)) {
-                do {
-                    if (pe.th32ProcessID == currentPID) {
-                        break;
-                    }
-                } while (Process32Next(hSnapshot, &pe));
-            }
-            CloseHandle(hSnapshot);
-        }
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER) {
-    }
-}
-
 void LeuProtection::GuardPagesProtection() {
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
@@ -215,7 +297,6 @@ void LeuProtection::GuardPagesProtection() {
             DWORD newProtect = PAGE_NOACCESS;
             DWORD oldProt;
             if (VirtualProtect(mbi.BaseAddress, sysInfo.dwPageSize, newProtect, &oldProt)) {
-                // Capturar las variables necesarias en la lambda
                 PVOID baseAddress = mbi.BaseAddress;
                 SIZE_T regionSize = sysInfo.dwPageSize;
                 DWORD originalProtect = oldProt;
@@ -294,7 +375,6 @@ void LeuProtection::ContinuousMemoryProtection() {
 }
 
 void LeuProtection::EnableMemoryGuard() {
-	//RemoveFromProcessList(); --> If you want to use this, just uncomment it || Si quieres utilizar esta función, solo descoméntala
     MemoryProtection();
     SpoofMemoryRegions();
 
