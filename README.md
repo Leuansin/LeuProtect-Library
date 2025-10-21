@@ -91,6 +91,7 @@ int main() {
 | Memory Protection | Uses VirtualProtect to secure memory regions | Usa VirtualProtect para proteger regiones de memoria |
 | Code Obfuscation | Runtime code modification to hinder static analysis | Modificación de código en tiempo de ejecución para dificultar análisis estático |
 | PE Header Protection | Secures and obfuscates PE headers | Protege y ofusca headers PE |
+| Anti-VM & SandBox | Detects if the executable is running on a Virtual Machine or a SandBox enviroment | Detecta si el ejecutable está corriendo en una Máquina Virtual o en un ambiente SandBox |
 | Continuous Monitoring | Real-time protection monitoring | Monitoreo en tiempo real de la protección |
 | Process Hiding | Optional process hiding capabilities | *Opcional* Oculta el proceso | DESACTIVATED BY DEFAULT | DESACTIVADO POR DEFECTO
 
