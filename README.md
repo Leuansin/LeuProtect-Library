@@ -1,4 +1,4 @@
-# 🛡️ LeuProtect Library 🛡️
+# <div align="center"> 🛡️ LeuProtect Library 🛡️ </div>
 <div align="center">
 
 **One-line C++ protection for Windows executables**
