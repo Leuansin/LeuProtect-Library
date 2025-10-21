@@ -158,6 +158,9 @@ bool LeuProtection::IsDebuggerDetected();
 
 // Shutdown protection system (optional) | Apagar sistema de protección (opcional)
 void LeuProtection::Shutdown();
+
+// Keeps Monitoring for debuggers activated and if found them. Kill the process (Optional) | Mantiene el monitoreo para debuggers y si los encuentra, mata el proceso (opcional)
+void LeuProtection::ContinuousMonitoring();
 ```
 
 **Protection Components | Componentes de Protección**
