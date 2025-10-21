@@ -188,7 +188,118 @@ void LeuProtection::MemoryProtection() {
     }
 }
 
+// ========== ANTI-VM & SANDBOX ==========
+bool CheckVMProcesses() {
+    const wchar_t* vmProcesses[] = {
+        L"vboxservice.exe", L"vboxtray.exe", L"vmwaretray.exe", 
+        L"vmwareuser.exe", L"vmtoolsd.exe", L"vmacthlp.exe",
+        L"vmusrvc.exe", L"prl_tools.exe", L"prl_cc.exe", L"xenservice.exe"
+    };
+    for (const wchar_t* proc : vmProcesses) {
+        if (GetModuleHandleW(proc)) return true;
+    }
+    return false;
+}
+
+bool CheckSandboxProcesses() {
+    const wchar_t* sandboxProcesses[] = {
+        L"sandboxie.exe", L"sandboxiedcomlaunch.exe", L"sbiectrl.exe",
+        L"sbiesvc.exe", L"cuckoo.exe", L"ana.exe", L"joebox.exe"
+    };
+    for (const wchar_t* proc : sandboxProcesses) {
+        if (GetModuleHandleW(proc)) return true;
+    }
+    return false;
+}
+
+bool CheckVMRegistry() {
+    HKEY hKey;
+    const wchar_t* vmKeys[] = {
+        L"HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 0\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0",
+        L"SYSTEM\\CurrentControlSet\\Services\\Disk\\Enum",
+        L"SYSTEM\\CurrentControlSet\\Services\\vmmouse",
+        L"SYSTEM\\CurrentControlSet\\Services\\VBoxGuest",
+        L"SYSTEM\\CurrentControlSet\\Services\\VBoxSF"
+    };
+    for (const wchar_t* keyPath : vmKeys) {
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, keyPath, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CheckLowResources() {
+    MEMORYSTATUSEX memInfo;
+    memInfo.dwLength = sizeof(memInfo);
+    GlobalMemoryStatusEx(&memInfo);
+    if (memInfo.ullTotalPhys < (4ULL * 1024 * 1024 * 1024)) return true;
+
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+    if (sysInfo.dwNumberOfProcessors < 2) return true;
+
+    return false;
+}
+
+bool CheckCPUID() {
+    int cpuInfo[4];
+    __cpuid(cpuInfo, 1);
+    return (cpuInfo[2] & (1 << 31));
+}
+
+bool CheckVendorID() {
+    int cpuInfo[4];
+    __cpuid(cpuInfo, 0);
+    char vendor[13];
+    memcpy(vendor, &cpuInfo[1], 4);
+    memcpy(vendor + 4, &cpuInfo[3], 4);
+    memcpy(vendor + 8, &cpuInfo[2], 4);
+    vendor[12] = '\0';
+    
+    return (strcmp(vendor, "VMwareVMware") == 0 || 
+            strcmp(vendor, "XenVMMXenVMM") == 0 ||
+            strcmp(vendor, "KVMKVMKVM") == 0 ||
+            strcmp(vendor, "Microsoft Hv") == 0);
+}
+
+bool CheckDeviceObjects() {
+    const wchar_t* devices[] = {
+        L"\\\\.\\VBoxGuest", L"\\\\.\\VBoxMouse", L"\\\\.\\VBoxVideo",
+        L"\\\\.\\VBoxMiniRdrDN", L"\\\\.\\pipe\VBoxMiniRdDN",
+        L"\\\\.\\VBoxTrayIPC", L"\\\\.\\pipe\VBoxTrayIPC"
+    };
+    
+    for (const wchar_t* device : devices) {
+        HANDLE hDevice = CreateFileW(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+        if (hDevice != INVALID_HANDLE_VALUE) {
+            CloseHandle(hDevice);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CheckSandboxVM() {
+    if (CheckVMProcesses()) return true;
+    if (CheckSandboxProcesses()) return true;
+    if (CheckVMRegistry()) return true;
+    if (CheckLowResources()) return true;
+    if (CheckCPUID()) return true;
+    if (CheckVendorID()) return true;
+    if (CheckDeviceObjects()) return true;
+    return false;
+}
+// ========== ANTI-VM & SANDBOX ==========
+
+
 void LeuProtection::AntiAnalysis() {
+    if (CheckSandboxVM()) {
+    debuggerDetected = true;
+    ExitProcess(0);
+    }
+    
     if (CheckDebuggerProcessNames()) {
         debuggerDetected = true;
         ExitProcess(0);
@@ -214,6 +325,8 @@ void LeuProtection::AntiAnalysis() {
         debuggerDetected = true;
         ExitProcess(0);
     }
+
+    
 
     auto start = std::chrono::high_resolution_clock::now();
     volatile int dummy = 0;
