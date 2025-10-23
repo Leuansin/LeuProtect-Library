@@ -1251,12 +1251,12 @@ void LeuProtection::EnableMemoryGuard() {
 
 void LeuProtection::Initialize() {
     MemoryProtection();
-    //CodeObfuscation();
-    //AntiAnalysis(); -- Aumenta riesgo
+    CodeObfuscation();
+    AntiAnalysis();
     PreventDLLInjection();
     ErasePEHeaders();
     CleanTraces();
-    //EnableMemoryGuard(); -- Aumenta riesgo
+    EnableMemoryGuard();
 
     // Initialize some things
     dllMonitoring = true;
