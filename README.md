@@ -5,7 +5,7 @@
 
 *Protección C++ para ejecutables Windows*
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![C++](https://img.shields.io/badge/C++-17-orange)
@@ -14,18 +14,18 @@
 
 ## 🌟 **About | Acerca de**
 
-**LeuProtect Library** is a lightweight, powerful C++ library designed to protect your Windows executables from reverse engineering, debugging, and memory scanning with just one function call.
+**LeuProtect Library** is a lightweight, powerful C++ library designed to protect your Windows executables from reverse engineering, debugging, memory scanning, VM detection, sandbox analysis, and cracking tools with just one function call.
 
-**LeuProtect Library** es una librería C++ ligera y poderosa diseñada para proteger tus ejecutables Windows de ingeniería inversa, debugging y escaneo de memoria con una sola llamada de función.
+**LeuProtect Library** es una librería C++ ligera y poderosa diseñada para proteger tus ejecutables Windows de ingeniería inversa, debugging, escaneo de memoria, detección de máquinas virtuales, análisis de sandbox y herramientas de cracking con una sola llamada de función.
 
 ```cpp
 #include "protection.h"
 
 int main() {
-    LeuProtect::Initialize();  // That's it! | ¡Eso es todo!
+    // The rest of your beautiful code
+    // El resto de tu hermoso código
 
-  // The rest of your beautiful code
-  // El resto de tu hermoso código
+    LeuProtect::Initialize();  // That's it! | ¡Eso es todo!
 }
 ```
 
@@ -50,9 +50,9 @@ int main() {
 #include "protection.h"
 
 int main() {
-    LeuProtect::Initialize();  // Protection activated!
-
     // Your application code
+
+    LeuProtect::Initialize();  // Protection activated!
 }
 ```
 
@@ -73,9 +73,9 @@ int main() {
 #include "protection.h"
 
 int main() {
-    LeuProtect::Initialize();  // ¡Protección activada!
-
     // Tu código de aplicación
+
+    LeuProtect::Initialize();  // ¡Protección activada!
 }
 ```
 
@@ -87,13 +87,18 @@ int main() {
 
 | Feature | Description | Descripción |
 |---|---:|---|
-| Multi-Layer Debugger Detection | Combines API checks, PEB, hardware breakpoints, checksum verification, window detection, registry keys, and timing analysis | Combina verificaciones de API, PEB, puntos de interrupción hardware, verificación de checksum, detección de ventanas, claves de registro y análisis de tiempo
+| Multi-Layer Debugger Detection | Combines API checks, PEB, hardware breakpoints, checksum verification, window detection, registry keys, and timing analysis | Combina verificaciones de API, PEB, puntos de interrupción hardware, verificación de checksum, detección de ventanas, claves de registro y análisis de tiempo |
 | Memory Protection | Uses VirtualProtect to secure memory regions | Usa VirtualProtect para proteger regiones de memoria |
 | Code Obfuscation | Runtime code modification to hinder static analysis | Modificación de código en tiempo de ejecución para dificultar análisis estático |
 | PE Header Protection | Secures and obfuscates PE headers | Protege y ofusca headers PE |
-| Anti-VM & SandBox | Detects if the executable is running on a Virtual Machine or a SandBox enviroment | Detecta si el ejecutable está corriendo en una Máquina Virtual o en un ambiente SandBox |
+| Anti-VM & SandBox | Detects if the executable is running on a Virtual Machine or a SandBox environment | Detecta si el ejecutable está corriendo en una Máquina Virtual o en un ambiente SandBox |
+| Advanced VM Detection | Checks for VM processes, registry keys, specific values, low resources, CPUID, VendorID, and device objects | Verifica procesos de VM, claves de registro, valores específicos, recursos bajos, CPUID, VendorID y objetos de dispositivo |
+| Sandbox Detection | Detects sandbox processes and analysis tools | Detecta procesos de sandbox y herramientas de análisis |
+| Anti-Cracking Tools | Detects and blocks known cracking tools and patchers | Detecta y bloquea herramientas de cracking y parcheadores conocidos |
+| DLL Injection Protection | Monitors and blocks malicious DLLs | Monitorea y bloquea DLLs maliciosas |
+| AuthKey Protection | Protects against hosts file tampering, certificate manipulation, and suspicious directories | Protege contra manipulación de archivos hosts, certificados y directorios sospechosos |
 | Continuous Monitoring | Real-time protection monitoring | Monitoreo en tiempo real de la protección |
-| Process Hiding | Optional process hiding capabilities | *Opcional* Oculta el proceso | DESACTIVATED BY DEFAULT | DESACTIVADO POR DEFECTO
+| Process Hiding | Optional process hiding capabilities | *Opcional* Oculta el proceso | DESACTIVATED BY DEFAULT | DESACTIVADO POR DEFECTO |
 
 ### ⚡ Technical Features | Características Técnicas
 
@@ -165,11 +170,15 @@ void LeuProtection::ContinuousMonitoring();
 
 **Protection Components | Componentes de Protección**
 
-- Memory Protection - VirtualProtect security  
-- Anti-Debugging - Debugger detection and prevention  
-- Code Obfuscation - Runtime code modification  
-- PE Security - Header protection and cleaning  
+- Memory Protection - VirtualProtect security
+- Anti-Debugging - Debugger detection and prevention
+- Code Obfuscation - Runtime code modification
+- PE Security - Header protection and cleaning
 - Process Security - Memory and process hiding
+- Anti-VM & Sandbox - Virtual machine and sandbox detection
+- Anti-Cracking - Detection of cracking tools and patchers
+- DLL Injection Protection - Blocking malicious DLLs
+- AuthKey Protection - Protection against authentication bypass
 
 ---
 
@@ -177,9 +186,9 @@ void LeuProtection::ContinuousMonitoring();
 
 **Method 1: Direct File Inclusion | Método 1: Inclusión Directa**
 
-1. Download `LeuProtection.h` and `LeuProtection.cpp`  
-2. Add them to your project  
-3. Include the header in your main file  
+1. Download `protection.h` and `protection.cpp`
+2. Add them to your project
+3. Include the header in your main file
 4. Call `LeuProtection::Initialize()`
 
 **Method 2: Git Submodule | Método 2: Submódulo Git**
@@ -195,9 +204,9 @@ git submodule add https://github.com/yourusername/leuprotect-lib.git
 **Perfect for | Perfecto para:**
 
 - Game Ch3ats & Mods - Protect your externals, exes or any other kind of executables
-- Anti-Cracking - Prevent reverse engineering  
-- DRM Systems - Software protection  
-- Sensitive Applications - Security-critical software  
+- Anti-Cracking - Prevent reverse engineering
+- DRM Systems - Software protection
+- Sensitive Applications - Security-critical software
 
 ---
 
@@ -211,9 +220,9 @@ Esta librería está destinada solo para fines educativos y de protección legí
 
 **Technical Notes | Notas Técnicas**
 
-- ✅ Works with: Visual Studio, GCC, Clang on Windows  
-- ✅ Compatible with: C++17 and above  
-- ✅ Tested on: Windows 7, 8, 10, 11  
+- ✅ Works with: Visual Studio, GCC, Clang on Windows
+- ✅ Compatible with: C++17 and above
+- ✅ Tested on: Windows 7, 8, 10, 11
 - ⚠️ Anti-cheat compatibility: May trigger some anti-cheat systems (if you know what you are doing, you will bypass this easily)
 
 ---
@@ -222,17 +231,17 @@ Esta librería está destinada solo para fines educativos y de protección legí
 
 We welcome contributions! | ¡Agradecemos las contribuciones!
 
-1. Fork the project | Haz fork del proyecto  
-2. Create your feature branch | Crea tu rama de características  
-3. Commit your changes | Haz commit de tus cambios  
-4. Push to the branch | Push a la rama  
+1. Fork the project | Haz fork del proyecto
+2. Create your feature branch | Crea tu rama de características
+3. Commit your changes | Haz commit de tus cambios
+4. Push to the branch | Push a la rama
 5. Open a Pull Request | Abre un Pull Request
 
 ---
 
 ## 📄 License | Licencia
 
-This project is licensed under the MIT License - All creditos to Leuan.  
+This project is licensed under the MIT License - All creditos to Leuan.
 Este proyecto está bajo la Licencia MIT - Todos los créditos a Leuan.
 
 ---
@@ -251,5 +260,6 @@ Open an issue on GitHub: https://github.com/yourusername/leuprotect-lib/issues
 
 ---
 
-Made with ❤️ for the C++ security community  
+Made with ❤️ for the C++ security community
 Hecho con ❤️ para la comunidad de seguridad C++
+
