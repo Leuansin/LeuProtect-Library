@@ -278,6 +278,13 @@ bool CheckDebuggerProcessNames() {
         L"x32dbg.exe",
         L"x64dbg.exe",
         L"x64dbg-unsigned.exe",
+        L"idat.exe",
+        L"idat64.exe",
+        L"qwingraph.exe",
+        L"ida.exe",
+        L"ida64.exe",
+        L"Aphopenia.exe",
+
     };
 
     for (const wchar_t* tool : debuggers) {
@@ -419,6 +426,14 @@ bool LeuProtection::CheckKnownMaliciousModules() {
 
     std::vector<KnownModule> maliciousModules = {
 
+        // IDA
+        {L"idat.exe", "26F9EDEF3C39C5D826A953711800CD74"},
+        {L"idat64.exe", "A281903A73582E5E404604936056FEE9"},
+        {L"qwingraph.exe", "3FB5202F388CA3ADA3AB12FED5D7207E"},
+        {L"ida.exe", "9D6D3E344709427AB731813F88A739E1"},
+        {L"ida64.exe", "24BA0B4E0A3445A6C2FB866D94669F05"},
+        {L"idapyswitch.exe", "896E63C20CA85737E90D32DDA6004206"},
+
         // DBG
         {L"x64dbg.exe", "4151C6340FCB88C88C24F5FF01ED26A4"},
         {L"x64dbg-unsigned.exe", "504031A51F281185E2D216956D92E51E"},
@@ -477,6 +492,7 @@ bool LeuProtection::CheckKnownMaliciousModules() {
         {L"DUP.exe", "04522C0D75B3A49D1A1F2295D7BAA498"}, // Diferente
         {L"dumper.exe", "268B9215FB788AAC11DC5700EE851CB9"},
         {L"Extreme Injector v3.exe", "EC801A7D4B72A288EC6C207BB9FF0131"},
+        {L"Aphopenia.exe", "FFBD8DFE9A105DAF8BAC2E4C5767FF83"},
 
         // Añadir más según vaya pasando el tiempo... 
         // ¿Posiblemente de servicios de VM's y Sandbox's?
